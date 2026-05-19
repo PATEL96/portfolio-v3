@@ -260,7 +260,7 @@ function Prompt() {
 	return (
 		<span className="shrink-0 flex items-baseline gap-1 text-sm select-none">
 			<span className="text-[#8b949e]">~/</span>
-			<span className="text-[#58a6ff] font-bold">patel96-portfolio</span>
+			<span className="text-[#58a6ff] font-bold">patel96</span>
 			<span className="text-[#3fb950]"> main</span>
 			<span className="text-[#3fb950]"> ❯</span>
 		</span>
@@ -481,7 +481,7 @@ export default function Terminal() {
 						<span className="w-3 h-3 rounded-full bg-[#28c840]" />
 					</div>
 					<span className="text-sm text-[#8b949e]">
-						rajdpatel — zsh — {Math.floor(size.w / 7)}×
+						patel96 — zsh — {Math.floor(size.w / 7)}×
 						{Math.floor(size.h / 15)}
 					</span>
 				</div>

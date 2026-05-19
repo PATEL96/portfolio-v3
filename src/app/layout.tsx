@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "Raj D. Patel — Portfolio",
+	title: "PATEL96",
 	description:
 		"Interactive terminal portfolio of Raj D. Patel — blockchain developer & full-stack engineer.",
 };
