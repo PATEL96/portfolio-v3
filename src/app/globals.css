@@ -1,67 +1,122 @@
 @import "tailwindcss";
 
-* {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
+@theme {
+	--color-bg: #0d1117;
+	--color-surface: #161b22;
+	--color-border: #30363d;
+	--color-fg: #c9d1d9;
+	--color-muted: #8b949e;
+	--color-accent: #58a6ff;
+	--color-accent-bright: #79c0ff;
+	--color-ok: #3fb950;
+	--color-warn: #febc2e;
+	--color-err: #f85149;
+	--shadow-window: 0 32px 80px rgb(0 0 0 / 0.8);
+	--font-mono: var(--font-jetbrains-mono), ui-monospace, Menlo, Consolas,
+		"DejaVu Sans Mono", monospace;
 }
 
-html,
-body {
-	height: 100%;
-	background: #0d1117;
-	color: #c9d1d9;
-	font-family: "JetBrains Mono", "Fira Code", monospace;
-	overflow: hidden;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-	width: 6px;
-}
-::-webkit-scrollbar-track {
-	background: #0d1117;
-}
-::-webkit-scrollbar-thumb {
-	background: rgba(88, 166, 255, 0.2);
-	border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-	background: rgba(88, 166, 255, 0.4);
-}
-
-/* Cursor blink */
-.cursor-blink {
-	animation: blink 1s step-end infinite;
-}
-@keyframes blink {
-	0%,
-	100% {
-		opacity: 1;
+@layer base {
+	html {
+		color-scheme: dark;
 	}
-	50% {
-		opacity: 0;
+
+	html,
+	body {
+		height: 100%;
+		background: var(--color-bg);
+		color: var(--color-fg);
+		font-family: var(--font-mono);
+		overflow: hidden;
 	}
-}
 
-/* Scanline overlay */
-.scanline::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background: repeating-linear-gradient(
-		to bottom,
-		transparent 0px,
-		transparent 3px,
-		rgba(255, 255, 255, 0.008) 3px,
-		rgba(255, 255, 255, 0.008) 4px
-	);
-	pointer-events: none;
-	z-index: 10;
-}
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-border) transparent;
+	}
 
-/* Pre-formatted text */
-.pre-wrap {
-	white-space: pre-wrap;
-	word-break: break-word;
+	pre,
+	input {
+		font-family: inherit;
+	}
+
+	/* Terminal window entrance — CSS-only so the server HTML is fully opaque */
+	@keyframes terminal-in {
+		from {
+			opacity: 0;
+			transform: scale(0.96);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	.terminal-enter {
+		animation: terminal-in 0.4s ease-out;
+	}
+
+	/* Decorative banner / box-drawing glyphs (█ ╗ ═ ║ ├ └). JetBrains Mono's
+	   latin subset lacks them, so they always resolve to a system monospace.
+	   GLYPH ADVANCE CONTRACT: every font in this stack must render these
+	   glyphs at a 0.6em advance (the standard monospace width) — the banner
+	   and box width calculations in Terminal.tsx depend on it. The measured
+	   advance of the banner glyphs is ~0.602em; the banner font-size calc
+	   divides by 42.2 (69 glyphs × ~0.602em with ~2% slack). Ligatures are
+	   disabled so sequences like ══ never collapse into a single glyph. */
+	.terminal-glyphs {
+		font-family: ui-monospace, Menlo, Consolas, "DejaVu Sans Mono",
+			monospace;
+		font-variant-ligatures: none;
+	}
+
+	/* Banner sizing: capped at 14px and scaled so the widest banner line
+	   (69 glyphs × ~0.602em ≈ 42.2em, with ~2% slack) always fits its box —
+	   the vw fallback divides by the viewport minus page padding. When
+	   container queries are supported, the scrollback scroller (marked
+	   @container in Terminal.tsx) is sized by the container instead — cqw is
+	   the scroller's content box, which already excludes its px padding, so
+	   nothing is subtracted there. This keeps the banner correct inside
+	   floating windows, whose width differs from 100vw, at every width. */
+	.terminal-banner-fit {
+		font-size: min(14px, calc((100vw - 2rem) / 42.2));
+	}
+	@supports (font-size: 1cqw) {
+		.terminal-banner-fit {
+			font-size: min(14px, calc(100cqw / 42.2));
+		}
+	}
+
+	/* Command-chips scroller: 12px fade on the right edge so a partially
+	   scrolled chip reads as "more content", never as a cut-off element
+	   (on 375px the strip ends flush at the screen edge). The mask applies
+	   ONLY while the strip is horizontally scrollable AND not scrolled
+	   fully to the end — Terminal.tsx tracks that via a scroll listener +
+	   ResizeObserver and sets data-fade accordingly — and never while a
+	   chip is focused (:focus-within), so the fade can never dim a focus
+	   outline. The scroller keeps px-1 padding, so chip focus outlines
+	   stay clear of the clip edge. */
+	.chips-fade[data-fade="true"] {
+		-webkit-mask-image: linear-gradient(
+			to right,
+			#000 calc(100% - 12px),
+			transparent
+		);
+		mask-image: linear-gradient(
+			to right,
+			#000 calc(100% - 12px),
+			transparent
+		);
+	}
+
+	.chips-fade[data-fade="true"]:focus-within {
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.terminal-enter {
+			animation: none;
+		}
+	}
 }
